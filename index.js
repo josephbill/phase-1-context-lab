@@ -1,82 +1,89 @@
+// 1. createRecordEmployee : receive an array of info about an employee
+// 2. return an object with the details of that employee 
+// 3.
+// createEmployeeRecord 
 let createEmployeeRecord = function(row){
     return {
-        first_name: row[0],
+        firstName: row[0],
         familyName: row[1],
         title: row[2],
-        pay_per_hour: row[3],
+        payPerHour: row[3],
         timeInEvents: [],
         timeOutEvents: []
     }
 }
 
-let createEmployeeRecords = function(employeeRowData) {
+// createEmployeeRecords 
+let createEmployeeRecords = function(employeeRowData){
     return employeeRowData.map(function(row){
         return createEmployeeRecord(row)
     })
 }
 
-let createTimeInEvent = function(dateStamp){
-    let [date, hour] = dateStamp.split(' ')
-
+// create time in event 
+let createTimeInEvent = function(datestamp){
+    let [date, hour] = datestamp.split(' ') // split 
     this.timeInEvents.push({
         type: "TimeIn",
-        hour: parseInt(hour, 10),
-        date,
-    })
-
-    return this
+        hour: parseInt(hour, 10), 
+        date: date
+    }); 
+    return this 
 }
 
-let createTimeOutEvent = function(dateStamp){
-    let [date, hour] = dateStamp.split(' ')
-
+// create time out event 
+let createTimeOutEvent = function(datestamp){
+    let [date, hour] = datestamp.split(' ') // split 
     this.timeOutEvents.push({
         type: "TimeOut",
-        hour: parseInt(hour, 10),
-        date,
-    })
-
-    return this
+        hour: parseInt(hour, 10), 
+        date: date
+    }); 
+    return this 
 }
+// hours worked 
+let hoursWorkedOnDate = function(datestamp){
+     let inEvent = this.timeInEvents.find(e => e.date === datestamp)
+     let outEvent = this.timeOutEvents.find(e => e.date === datestamp)
 
-let hoursWorkedOnDate = function(soughtDate){
-    let inEvent = this.timeInEvents.find(function(e){
-        return e.date === soughtDate
-    })
-
-    let outEvent = this.timeOutEvents.find(function(e){
-        return e.date === soughtDate
-    })
-
-    return (outEvent.hour - inEvent.hour) / 100
+     return (outEvent.hour - inEvent.hour) / 100 
 }
+let emp = createEmployeeRecord(["joseph","mbugua","software dev",800])
+createTimeInEvent.call(emp, "2025-03-25 0900")
+createTimeOutEvent.call(emp,"2025-03-25 2100")
+console.log(hoursWorkedOnDate.call(emp, "2025-03-25"))
+console.log(emp)
 
-let wagesEarnedOnDate = function(dateSought){
-    let rawWage = hoursWorkedOnDate.call(this, dateSought)
-        * this.pay_per_hour
-    return parseFloat(rawWage.toString())
+//wagesEarnedOnDate
+let wagesEarnedOnDate = function(datestamp){
+    let rawWage = hoursWorkedOnDate.call(this, datestamp) * this.payPerHour
+    return parseFloat(rawWage.toString());
 }
+console.log(wagesEarnedOnDate.call(emp,"2025-03-25"))
 
-let allWagesFor = function(){
-    let eligibleDates = this.timeInEvents.map(function(e){
+ const allWagesFor = function () {
+    // getting an array of all worked dates for the employee
+    const eligibleDates = this.timeInEvents.map(function (e) {
         return e.date
     })
-
-    let payable = eligibleDates.reduce(function(memo, d){
+    // reduce is used to sum up the wages for each date 
+    const payable = eligibleDates.reduce(function (memo, d) {
+        console.log(memo, d)
         return memo + wagesEarnedOnDate.call(this, d)
-    }.bind(this), 0)
+    }.bind(this), 0) // <== Hm, why did we need to add bind() there? We'll discuss soon!
 
     return payable
 }
 
-let findEmployeeByFirstName = function(srcArray, first_name) {
-    return srcArray.find(function(rec){
-        return rec.first_name === first_name
-    })
+// 
+let findEmployeeByFirstName = function(srcArray, firstName){
+    return srcArray.find(rec => rec.firstName === firstName)
 }
 
-let calculatePayroll = function(arrayOfEmployeeRecords){
-    return arrayOfEmployeeRecords.reduce(function(memo, rec){
+//calculatePayroll
+let calculatePayroll = function(arrayEmp){
+     return arrayEmp.reduce((memo,rec) =>{
         return memo + allWagesFor.call(rec)
-    }, 0)
+     }, 0)
 }
+
